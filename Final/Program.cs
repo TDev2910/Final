@@ -29,7 +29,8 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true; // Session quan trọng, không bị xóa
 });
 
-var app = builder.Build();
+var app = builder.Build();  
+
 
 // Cấu hình pipeline HTTP
 if (!app.Environment.IsDevelopment())
