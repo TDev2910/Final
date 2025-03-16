@@ -14,68 +14,111 @@
 }
 
 <form method="post" asp-action="ConfirmOrder" asp-controller="Order">
-    <div class="form-group">
-        <label>Họ *</label>
-        <input type="text" asp-for="LastName" class="form-control" required />
+    <div class="row">
+        <!-- Cột bên trái -->
+        <div class="col-md-7">
+            <h5 class="fw-bold">GIAO HÀNG ĐẾN</h5>
+
+            <div class="form-group">
+                <label for="LastName">Họ *</label>
+                <input type="text" asp-for="LastName" class="form-control" required />
+            </div>
+
+            <div class="form-group">
+                <label for="FirstName">Tên *</label>
+                <input type="text" asp-for="FirstName" class="form-control" required />
+            </div>
+
+            <div class="form-group">
+                <label for="Phone">Số điện thoại *</label>
+                <input type="text" asp-for="Phone" class="form-control" required />
+            </div>
+
+            <div class="form-group">
+                <label for="Email">Email *</label>
+                <input type="email" asp-for="Email" class="form-control" required />
+            </div>
+
+            <h5 class="fw-bold mt-4">PHƯƠNG THỨC VẬN CHUYỂN</h5>
+            <div class="form-group">
+                <select asp-for="ShippingMethod" class="form-control" id="shippingMethod" required>
+                    <option value="Giao hàng tận nơi">Giao hàng tận nơi</option>
+                    <option value="Hẹn lấy tại cửa hàng">Hẹn lấy tại cửa hàng</option>
+                </select>
+            </div>
+
+            <div id="addressContainer" class="form-group">
+                <label for="Address">Địa chỉ *</label>
+                <input type="text" asp-for="Address" class="form-control" required />
+            </div>
+
+            <div id="storeContainer" class="form-group" style="display: none;">
+                <label for="City">Tỉnh thành *</label>
+                <select id="citySelect" asp-for="City" class="form-control">
+                    <option value="Hồ Chí Minh">Hồ Chí Minh</option>
+                    <option value="Hà Nội">Hà Nội</option>
+                    <option value="Vũng Tàu">Vũng Tàu</option>
+                </select>
+
+                <label for="Store">Cửa hàng *</label>
+                <select id="storeSelect" asp-for="Store" class="form-control">
+                    <option value="FKT">FKT</option>
+                    <option value="HK">Hùng khỉ</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="Notes">Ghi chú</label>
+                <textarea asp-for="Notes" class="form-control"></textarea>
+            </div>
+
+            <h5 class="fw-bold mt-4">PHƯƠNG THỨC THANH TOÁN</h5>
+            <div class="form-group">
+                <select asp-for="PaymentMethod" class="form-control" required>
+                    <option value="COD">Thanh toán khi nhận hàng</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-success mt-3">Xác nhận đơn hàng</button>
+        </div>
+
+        <!-- Cột bên phải -->
+        <div class="col-md-5">
+            <div class="card p-3">
+                <h5 class="fw-bold">CHI TIẾT ĐƠN HÀNG</h5>
+                @if (Model.CartItems != null && Model.CartItems.Any())
+                {
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Tên sản phẩm</th>
+                                <th>Số lượng</th>
+                                <th>Giá</th>
+                                <th>Tổng</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.CartItems)
+                            {
+                                <tr>
+                                    <td>@item.Product.Name</td>
+                                    <td>@item.Quantity</td>
+                                    <td>@string.Format("{0:N0} đ", item.Price)</td>
+                                    <td>@string.Format("{0:N0} đ", item.Price * item.Quantity)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p>Giỏ hàng trống.</p>
+                }
+                <hr>
+                <h4 class="text-danger fw-bold text-end">💰 Tổng cộng: @string.Format("{0:N0} đ", ViewData["TotalPrice"])</h4>
+            </div>
+        </div>
     </div>
-
-    <div class="form-group">
-        <label>Tên *</label>
-        <input type="text" asp-for="FirstName" class="form-control" required />
-    </div>
-
-    <div class="form-group">
-        <label>Số điện thoại *</label>
-        <input type="text" asp-for="Phone" class="form-control" required />
-    </div>
-
-    <div class="form-group">
-        <label>Email *</label>
-        <input type="email" asp-for="Email" class="form-control" required />
-    </div>
-
-    <div class="form-group">
-        <label>Phương thức vận chuyển *</label>
-        <select asp-for="ShippingMethod" class="form-control" id="shippingMethod">
-            <option value="Giao hàng tận nơi">Giao hàng tận nơi</option>
-            <option value="Hẹn lấy tại cửa hàng">Hẹn lấy tại cửa hàng</option>
-        </select>
-    </div>
-
-    <div id="addressContainer" class="form-group">
-        <label>Địa chỉ *</label>
-        <input type="text" asp-for="Address" class="form-control" required />
-    </div>
-
-    <div id="storeContainer" class="form-group" style="display: none;">
-        <label>Tỉnh thành *</label>
-        <select id="citySelect" asp-for="City" class="form-control">
-            <option value="Hồ Chí Minh">Hồ Chí Minh</option>
-            <option value="Hà Nội">Hà Nội</option>
-            <option value="Vũng Tàu">Vũng Tàu</option>
-        </select>
-
-        <label>Cửa hàng *</label>
-        <select id="storeSelect" asp-for="Store" class="form-control">
-            <option value="FKT">FKT</option>
-            <option value="HK">Hùng khỉ</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label>Ghi chú</label>
-        <textarea asp-for="Notes" class="form-control"></textarea>
-    </div>
-
-    <div class="form-group">
-        <label>Phương thức thanh toán *</label>
-        <select asp-for="PaymentMethod" class="form-control">
-            <option value="COD">Thanh toán khi nhận hàng</option>
-        </select>
-    </div>
-
-    <h4 class="mt-4 text-danger">💰 Tổng cộng: @string.Format("{0:N0} đ", ViewData["TotalPrice"])</h4>
-    <button type="submit" class="btn btn-success mt-3">✅ Xác nhận đơn hàng</button>
 </form>
 
 <script>
@@ -93,7 +136,6 @@
         document.getElementById("storeContainer").style.display = shippingMethod === "Hẹn lấy tại cửa hàng" ? "block" : "none";
     };
 </script>
-
 
 
 @* @model OrderModel *@

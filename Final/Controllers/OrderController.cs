@@ -30,6 +30,11 @@ namespace Final.Controllers
 
             Console.WriteLine("Cart Items Count: " + model.CartItems.Count); // In ra số lượng sản phẩm trong giỏ hàng
 
+            // Tính tổng giá trị đơn hàng
+            var totalPrice = model.CartItems.Sum(i => i.Price * i.Quantity);
+            // Truyền tổng giá trị đơn hàng vào ViewData
+            ViewData["TotalPrice"] = totalPrice;
+
             return View(model);
         }
 
