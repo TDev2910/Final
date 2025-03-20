@@ -1,8 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Final.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Final.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using Microsoft.AspNetCore.Authentication;
+using System.Threading.Tasks;
 
 namespace Final.Controllers
 {
@@ -10,10 +14,13 @@ namespace Final.Controllers
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private const string SecurityCode = "2910"; // Mã bảo mật mặc định
 
-        public AdminController(ApplicationDbContext context)
+        public AdminController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // Trang Dashboard Admin
@@ -47,7 +54,8 @@ namespace Final.Controllers
             }
             return View("~/Views/Admin/Product/Create.cshtml", product); // Nếu lỗi, trả về form Create
         }
-        // **Hiển thị form sửa sản phẩm**
+
+        // Hiển thị form sửa sản phẩm
         public IActionResult Edit(int id)
         {
             var product = _context.Products.FirstOrDefault(p => p.Id == id);
@@ -58,7 +66,7 @@ namespace Final.Controllers
             return View("~/Views/Admin/Product/Edit.cshtml", product);
         }
 
-        // **Xử lý cập nhật sản phẩm**
+        // Xử lý cập nhật sản phẩm
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(Product product)
@@ -89,7 +97,8 @@ namespace Final.Controllers
             }
             return View("~/Views/Admin/Product/Edit.cshtml", product);
         }
-        //Xem sản phẩm
+
+        // Xem sản phẩm
         public IActionResult Details(int id)
         {
             var product = _context.Products.Find(id);
@@ -99,7 +108,8 @@ namespace Final.Controllers
             }
             return View("~/Views/Admin/Product/Details.cshtml", product);
         }
-        //xóa sản phẩm
+
+        // Xóa sản phẩm
         [HttpGet]
         public IActionResult Delete(int id)
         {
@@ -128,5 +138,83 @@ namespace Final.Controllers
             }
             return RedirectToAction("Index");  // Quay lại trang danh sách sản phẩm
         }
+
+        // Hiển thị form nhập mã bảo mật
+        public IActionResult EnterSecurityCode()
+        {
+            return View("~/Views/Admin/UserManagement/EnterSecurityCode.cshtml", new SecurityCodeViewModel());
+        }
+
+        // Xử lý mã bảo mật và hiển thị danh sách người dùng
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ValidateSecurityCode(SecurityCodeViewModel model)
+        {
+            string enteredCode = $"{model.Code1}{model.Code2}{model.Code3}{model.Code4}";
+            if (enteredCode != SecurityCode)
+            {
+                TempData["ErrorMessage"] = "Mã code không hợp lệ.";
+                return RedirectToAction("EnterSecurityCode");
+            }
+
+            return RedirectToAction("UserList");
+        }
+
+        // Hiển thị danh sách người dùng
+        [HttpGet]
+        public async Task<IActionResult> UserList(string searchQuery)
+        {
+            var users = await _userManager.Users.ToListAsync();
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                users = users.Where(u => u.UserName.Contains(searchQuery)).ToList();
+            }
+
+            var userList = new List<UserViewModel>();
+
+            foreach (var user in users)
+            {
+                userList.Add(new UserViewModel
+                {
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    IsActive = IsUserActive(user.UserName)
+                });
+            }
+
+            return View("~/Views/Admin/UserManagement/UserList.cshtml", userList);
+        }
+
+        private bool IsUserActive(string userName)
+        {
+            // Logic để kiểm tra trạng thái hoạt động của người dùng
+            var user = _userManager.Users.FirstOrDefault(u => u.UserName == userName);
+            if (user != null)
+            {
+                // Giả sử bạn có một thuộc tính LastActivityDate trong ApplicationUser
+                // return (DateTime.Now - user.LastActivityDate).TotalMinutes < 5;
+                return true; // Giả sử tất cả người dùng đều đang hoạt động
+            }
+            return false;
+        }
+    }
+
+    public class UserViewModel
+    {
+        public string UserName { get; set; }
+        public string Email { get; set; }
+        public bool IsActive { get; set; }
+    }
+
+    public class SecurityCodeViewModel
+    {
+        [Required]
+        public string Code1 { get; set; }
+        [Required]
+        public string Code2 { get; set; }
+        [Required]
+        public string Code3 { get; set; }
+        [Required]
+        public string Code4 { get; set; }
     }
 }

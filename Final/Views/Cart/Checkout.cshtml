@@ -72,12 +72,17 @@
                 <textarea asp-for="Notes" class="form-control"></textarea>
             </div>
 
-            <h5 class="fw-bold mt-4">PHƯƠNG THỨC THANH TOÁN</h5>
-            <div class="form-group">
-                <select asp-for="PaymentMethod" class="form-control" required>
-                    <option value="COD">Thanh toán khi nhận hàng</option>
-                </select>
-            </div>
+            <form method="post" asp-action="ConfirmOrder" asp-controller="Order">
+                <!-- Các trường thông tin đơn hàng -->
+                <div class="form-group">
+                    <label for="PaymentMethod">Phương thức thanh toán</label>
+                    <select asp-for="PaymentMethod" class="form-control" required>
+                        <option value="COD">Thanh toán khi nhận hàng</option>
+                        <option value="VNPAY">Thanh toán bằng VNPAY</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-success mt-3">Xác nhận đơn hàng</button>
+            </form>
 
             <button type="submit" class="btn btn-success mt-3">Xác nhận đơn hàng</button>
         </div>
@@ -138,166 +143,4 @@
 </script>
 
 
-@* @model OrderModel *@
 
-@* <div class="container mt-5"> *@
-@*     <h2 class="text-center text-danger fw-bold">THÔNG TIN ĐƠN HÀNG</h2> *@
-
-@*     @if (TempData["Error"] != null) *@
-@*     { *@
-@*         <div class="alert alert-danger text-center">@TempData["Error"]</div> *@
-@*     } *@
-
-@*     <div class="row"> *@
-@*         <div class="col-md-7"> *@
-@*             <form method="post" action="@Url.Action("ConfirmOrder", "Order")"> *@
-@*                 @Html.AntiForgeryToken() *@
-
-@*                 <h5 class="fw-bold">GIAO HÀNG ĐẾN</h5> *@
-
-@*                 <div class="mb-3"> *@
-@*                     <label class="form-label">Tên *</label> *@
-@*                     <input type="text" asp-for="Name" class="form-control" required> *@
-@*                     <span class="text-danger" asp-validation-for="Name"></span> *@
-@*                 </div> *@
-
-@*                 <div class="mb-3"> *@
-@*                     <label class="form-label">Địa chỉ *</label> *@
-@*                     <input type="text" asp-for="Address" class="form-control" required> *@
-@*                     <span class="text-danger" asp-validation-for="Address"></span> *@
-@*                 </div> *@
-
-@*                 <div class="mb-3"> *@
-@*                     <label class="form-label">Số điện thoại *</label> *@
-@*                     <input type="text" asp-for="Phone" class="form-control" required> *@
-@*                     <span class="text-danger" asp-validation-for="Phone"></span> *@
-@*                 </div> *@
-
-@*                 <div class="mb-3"> *@
-@*                     <label class="form-label">E-mail *</label> *@
-@*                     <input type="email" asp-for="Email" class="form-control" required> *@
-@*                     <span class="text-danger" asp-validation-for="Email"></span> *@
-@*                 </div> *@
-
-@*                 <h5 class="fw-bold">PHƯƠNG THỨC VẬN CHUYỂN</h5> *@
-@*                 <div class="mb-3"> *@
-@*                     <select id="shippingMethod" asp-for="ShippingMethod" class="form-select" required> *@
-@*                         <option value="">Chọn phương thức vận chuyển</option> *@
-@*                         <option value="Giao hàng tận nơi">Giao hàng tận nơi</option> *@
-@*                         <option value="Hẹn lấy tại cửa hàng">Hẹn lấy tại cửa hàng</option> *@
-@*                     </select> *@
-@*                     <span class="text-danger" asp-validation-for="ShippingMethod"></span> *@
-@*                 </div> *@
-
-@*                 <!-- Chọn tỉnh thành --> *@
-@*                 <div class="mb-3" id="provinceContainer" style="display: none;"> *@
-@*                     <label class="form-label">Tỉnh thành *</label> *@
-@*                     <select id="province" asp-for="Province" class="form-select"> *@
-@*                         <option value="">Chọn tỉnh thành</option> *@
-@*                         <option value="Hồ Chí Minh">Hồ Chí Minh</option> *@
-@*                         <option value="Vũng Tàu">Vũng Tàu</option> *@
-@*                     </select> *@
-@*                     <span class="text-danger" asp-validation-for="Province"></span> *@
-@*                 </div> *@
-
-@*                 <!-- Chọn cửa hàng --> *@
-@*                 <div class="mb-3" id="storeContainer" style="display: none;"> *@
-@*                     <label class="form-label">Cửa hàng *</label> *@
-@*                     <select id="store" asp-for="Store" class="form-select"> *@
-@*                         <option value="">Chọn cửa hàng</option> *@
-@*                     </select> *@
-@*                     <span class="text-danger" asp-validation-for="Store"></span> *@
-@*                 </div> *@
-
-@*                 <h5 class="fw-bold">PHƯƠNG THỨC THANH TOÁN</h5> *@
-@*                 <div class="mb-3"> *@
-@*                     <select asp-for="PaymentMethod" class="form-select" required> *@
-@*                         <option value="">Chọn phương thức thanh toán</option> *@
-@*                         <option value="COD">Thanh toán khi nhận hàng</option> *@
-@*                     </select> *@
-@*                     <span class="text-danger" asp-validation-for="PaymentMethod"></span> *@
-@*                 </div> *@
-
-@*                 <div class="mb-3"> *@
-@*                     <label class="form-label">Ghi chú</label> *@
-@*                     <textarea asp-for="Notes" class="form-control"></textarea> *@
-@*                     <span class="text-danger" asp-validation-for="Notes"></span> *@
-@*                 </div> *@
-
-@*                 <button type="submit" class="btn btn-danger w-100">Đặt hàng</button> *@
-@*             </form> *@
-@*         </div> *@
-
-@*         <div class="col-md-5"> *@
-@*             <div class="card p-3"> *@
-@*                 <h5 class="fw-bold">CHI TIẾT ĐƠN HÀNG</h5> *@
-@*                 @if (Model.CartItems != null && Model.CartItems.Any()) *@
-@*                 { *@
-@*                     foreach (var item in Model.CartItems) *@
-@*                     { *@
-@*                         <div class="d-flex justify-content-between"> *@
-@*                             <span>@item.Product.Name x @item.Quantity</span> *@
-@*                             <span>@string.Format("{0:N0} đ", item.Product.Price * item.Quantity)</span> *@
-@*                         </div> *@
-@*                     } *@
-@*                 } *@
-@*                 else *@
-@*                 { *@
-@*                     <p class="text-danger">Giỏ hàng trống!</p> *@
-@*                 } *@
-@*                 <hr> *@
-@*                 <h5 class="text-danger fw-bold text-end">Tổng cộng: @string.Format("{0:N0} đ", Model.TotalPrice)</h5> *@
-@*             </div> *@
-@*         </div> *@
-@*     </div> *@
-@* </div> *@
-
-@* @section Scripts { *@
-@*     <script> *@
-@*         document.getElementById("shippingMethod").addEventListener("change", function () { *@
-@*             let shippingMethod = this.value; *@
-@*             let provinceContainer = document.getElementById("provinceContainer"); *@
-@*             let storeContainer = document.getElementById("storeContainer"); *@
-
-@*             if (shippingMethod === "Hẹn lấy tại cửa hàng") { *@
-@*                 provinceContainer.style.display = "block"; *@
-@*                 storeContainer.style.display = "block"; *@
-@*             } else { *@
-@*                 provinceContainer.style.display = "none"; *@
-@*                 storeContainer.style.display = "none"; *@
-@*             } *@
-@*         }); *@
-
-@*         document.getElementById("province").addEventListener("change", function () { *@
-@*             let province = this.value; *@
-@*             let storeDropdown = document.getElementById("store"); *@
-
-@*             // Xóa toàn bộ danh sách cửa hàng trước đó *@
-@*             storeDropdown.innerHTML = '<option value="">Chọn cửa hàng</option>'; *@
-
-@*             // Danh sách cửa hàng test *@
-@*             let stores = { *@
-@*                 "Hồ Chí Minh": [ *@
-@*                     "Co.opmart Xa Lộ Hà Nội", *@
-@*                     "Big C An Lạc", *@
-@*                     "Vincom Phan Văn Trị" *@
-@*                 ], *@
-@*                 "Vũng Tàu": [ *@
-@*                     "Co.opmart Vũng Tàu", *@
-@*                     "Lotte Mart Bà Rịa", *@
-@*                     "Vincom Vũng Tàu" *@
-@*                 ] *@
-@*             }; *@
-
-@*             // Nếu chọn tỉnh có trong danh sách, hiển thị các cửa hàng tương ứng *@
-@*             if (stores[province]) { *@
-@*                 stores[province].forEach(store => { *@
-@*                     let option = document.createElement("option"); *@
-@*                     option.value = store; *@
-@*                     option.textContent = store; *@
-@*                     storeDropdown.appendChild(option); *@
-@*                 }); *@
-@*             } *@
-@*         }); *@
-@*     </script> *@
-@* } *@

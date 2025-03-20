@@ -20,6 +20,12 @@ public class OrderModel
     public string Notes { get; set; }
     [Required]
     public string PaymentMethod { get; set; }
+    public string Vnp_TmnCode { get; set; }
+    public string Vnp_HashSecret { get; set; }
+    public string Vnp_Url
+    {
+        get; set;
+    }
     public decimal TotalPrice
     {
         get { return CartItems?.Sum(i => i.Price * i.Quantity) ?? 0; }
@@ -30,4 +36,5 @@ public class OrderModel
 
     // ✅ THÊM THUỘC TÍNH `Province` nếu bạn có sử dụng trong Checkout
     public string Province { get; set; }
+
 }

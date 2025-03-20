@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Final.Models;
 using Final.Services;
+using Final.Services.Vnpay;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,10 +14,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
-
+// Đăng ký dịch vụ thanh toán VNPay 
+builder.Services.AddTransient<IVnPayService, VnPayService>();
 // Cấu hình dịch vụ SMTP Email
 builder.Services.AddTransient<EmailService>();
-
+// Đăng ký dịch vụ thanh toán VNPay 
 // Cấu hình các dịch vụ MVC
 builder.Services.AddControllersWithViews();
 

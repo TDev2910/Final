@@ -15,10 +15,12 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="VNPAY.NET" Version="8.5.0" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Repositories\" />
+    <Folder Include="Views\Payment\" />
     <Folder Include="wwwroot\img\" />
   </ItemGroup>
 
