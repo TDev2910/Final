@@ -3,7 +3,7 @@
 <div class="container mt-4">
     <h2 class="text-center mb-4">Thêm Thông Tin Sản Phẩm</h2>
 
-    <form asp-controller="Admin" asp-action="Create" method="post">
+    <form asp-controller="Admin" asp-action="Create" method="post" onsubmit="return validateForm();">
         <div class="row">
             <div class="col-md-6">
                 <div class="mb-3">
@@ -81,3 +81,46 @@
         </div>
     </form>
 </div>
+
+<!-- JavaScript -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        formatPriceInput(document.getElementById("priceInput"));
+        formatPriceInput(document.getElementById("discountPriceInput"));
+    });
+
+    function formatPriceInput(input) {
+        if (!input) return;
+        input.addEventListener("input", function (e) {
+            let rawValue = e.target.value.replace(/\D/g, ""); // Loại bỏ tất cả ký tự không phải là số
+            e.target.value = rawValue ? new Intl.NumberFormat("vi-VN").format(rawValue) : "";
+        });
+    }
+
+    function validateForm() {
+        let priceInput = document.getElementById("priceInput");
+        let discountPriceInput = document.getElementById("discountPriceInput");
+        let priceError = document.getElementById("priceError");
+
+        // Loại bỏ tất cả ký tự không phải là số
+        let rawPrice = priceInput.value.replace(/\D/g, "");
+        let rawDiscount = discountPriceInput.value.replace(/\D/g, "");
+
+        if (!rawPrice || parseInt(rawPrice) <= 0) {
+            priceError.innerText = "Giá sản phẩm không hợp lệ!";
+            priceError.style.display = "block";
+            return false;
+        }
+
+        if (rawDiscount && parseInt(rawDiscount) >= parseInt(rawPrice)) {
+            alert("Giá khuyến mãi phải nhỏ hơn giá gốc!");
+            return false;
+        }
+
+        priceError.style.display = "none";
+        priceInput.value = rawPrice;
+        discountPriceInput.value = rawDiscount;
+
+        return true;
+    }
+</script>

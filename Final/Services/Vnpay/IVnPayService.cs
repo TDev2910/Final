@@ -1,5 +1,4 @@
-﻿using Final.Vnpay;
-using Microsoft.AspNetCore.Http;
+﻿using Final.Models;
 
 namespace Final.Services.Vnpay
 {

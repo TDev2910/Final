@@ -1,7 +1,6 @@
 ﻿using Final.Infrastructure;
 using Final.Models;
 using Final.Services.Vnpay;
-using Final.Vnpay;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System;
@@ -24,25 +23,21 @@ namespace Final.Controllers
             _vnPayService = vnPayService;
         }
 
-        // Các phương thức hiện tại giữ nguyên...
-
+        // Confirm order and process payment
         [HttpPost]
         public IActionResult ConfirmOrder(OrderModel model)
         {
+            // Ensure cart items exist
             var cartItems = HttpContext.Session.GetJson<List<CartItem>>("Cart");
             if (cartItems == null || !cartItems.Any())
             {
                 TempData["Error"] = "Giỏ hàng trống hoặc có lỗi! Vui lòng kiểm tra lại.";
                 return View("~/Views/Cart/Checkout.cshtml", model);
             }
+
             model.CartItems = cartItems;
 
-            if (model.CartItems == null || !model.CartItems.Any())
-            {
-                TempData["Error"] = "Giỏ hàng trống hoặc có lỗi! Vui lòng kiểm tra lại.";
-                return View("~/Views/Cart/Checkout.cshtml", model);
-            }
-
+            // Create new order in database
             var newOrder = new Order
             {
                 FirstName = model.FirstName,
@@ -66,40 +61,35 @@ namespace Final.Controllers
                 }).ToList()
             };
 
-            try
-            {
-                _context.Orders.Add(newOrder);
-                _context.SaveChanges();  // Sau khi lưu, chúng ta có ID của đơn hàng
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = "Đã xảy ra lỗi khi xử lý đơn hàng. Vui lòng thử lại.";
-                Console.WriteLine(ex.Message);
-                return View("~/Views/Cart/Checkout.cshtml", model);
-            }
+            _context.Orders.Add(newOrder);
+            _context.SaveChanges(); // Save the new order
 
-            // Chuyển sang thanh toán VNPAY
+            // If VNPAY payment method is selected
             if (model.PaymentMethod == "VNPAY")
             {
                 var vnPayModel = new PaymentInformationModel
                 {
                     OrderType = "other",
-                    Amount = newOrder.TotalPrice,
+                    Amount = newOrder.TotalPrice,  // Total amount in decimal
                     OrderDescription = $"Thanh toán đơn hàng {newOrder.Id}",
                     Name = $"{model.FirstName} {model.LastName}",
-                    OrderId = newOrder.Id.ToString()
+                    OrderId = newOrder.Id.ToString(),
+                    ReturnUrl = Url.Action("PaymentReturn", "Order", null, protocol: Request.Scheme) // Return URL after payment
                 };
 
+                // Generate the VNPAY payment URL
                 string paymentUrl = _vnPayService.CreatePaymentUrl(vnPayModel, HttpContext);
-                return Redirect(paymentUrl);
+                return Redirect(paymentUrl); // Redirect to VNPAY payment page
             }
 
+            // If no VNPAY selected, show order success
             return RedirectToAction("OrderSuccess", new { id = newOrder.Id });
         }
 
+        // Handle VNPAY response after payment
         public IActionResult PaymentReturn()
         {
-            // Lấy orderId từ vnp_TxnRef
+            // Get the transaction reference from the query string
             if (!Request.Query.TryGetValue("vnp_TxnRef", out var txnRefValues))
             {
                 return RedirectToAction("Index", "Home");
@@ -116,15 +106,16 @@ namespace Final.Controllers
             if (order == null)
                 return RedirectToAction("Index", "Home");
 
-            // Xử lý kết quả thanh toán từ VNPAY
+            // Process the payment result from VNPAY
             var response = _vnPayService.PaymentExecute(Request.Query);
 
+            // Check if the transaction was successful
             if (response.Success)
             {
                 if (response.VnPayResponseCode == "00")
                 {
                     order.Status = "Đã thanh toán";
-                    _context.SaveChanges();
+                    _context.SaveChanges(); // Update order status
                     TempData["Success"] = "Thanh toán thành công!";
                 }
                 else
@@ -139,9 +130,10 @@ namespace Final.Controllers
                 TempData["Error"] = "Dữ liệu không hợp lệ!";
             }
 
-            return View(order);
+            return View(order); // Return to the payment response page
         }
 
+        // Show order success page after payment
         public IActionResult OrderSuccess(int id)
         {
             var order = _context.Orders.FirstOrDefault(o => o.Id == id);
@@ -149,7 +141,7 @@ namespace Final.Controllers
             if (order == null)
                 return RedirectToAction("Index", "Home");
 
-            return View(order);
+            return View(order); // Return the order details to the view
         }
     }
 }

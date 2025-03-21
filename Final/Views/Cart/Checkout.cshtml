@@ -72,17 +72,13 @@
                 <textarea asp-for="Notes" class="form-control"></textarea>
             </div>
 
-            <form method="post" asp-action="ConfirmOrder" asp-controller="Order">
-                <!-- Các trường thông tin đơn hàng -->
-                <div class="form-group">
-                    <label for="PaymentMethod">Phương thức thanh toán</label>
-                    <select asp-for="PaymentMethod" class="form-control" required>
-                        <option value="COD">Thanh toán khi nhận hàng</option>
-                        <option value="VNPAY">Thanh toán bằng VNPAY</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-success mt-3">Xác nhận đơn hàng</button>
-            </form>
+            <div class="form-group">
+                <label for="PaymentMethod">Phương thức thanh toán</label>
+                <select asp-for="PaymentMethod" class="form-control" required>
+                    <option value="COD">Thanh toán khi nhận hàng</option>
+                    <option value="VNPAY">Thanh toán bằng VNPAY</option>
+                </select>
+            </div>
 
             <button type="submit" class="btn btn-success mt-3">Xác nhận đơn hàng</button>
         </div>
@@ -141,6 +137,3 @@
         document.getElementById("storeContainer").style.display = shippingMethod === "Hẹn lấy tại cửa hàng" ? "block" : "none";
     };
 </script>
-
-
-

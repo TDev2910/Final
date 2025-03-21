@@ -50,9 +50,9 @@ namespace Final.Controllers
             {
                 _context.Products.Add(product);
                 _context.SaveChanges();
-                return RedirectToAction("Index"); // Chuyển hướng về trang danh sách sản phẩm
+                return RedirectToAction("Index");
             }
-            return View("~/Views/Admin/Product/Create.cshtml", product); // Nếu lỗi, trả về form Create
+            return View("~/Views/Admin/Product/Create.cshtml", product);
         }
 
         // Hiển thị form sửa sản phẩm
@@ -79,8 +79,14 @@ namespace Final.Controllers
                     return NotFound();
                 }
 
+                // Loại bỏ các ký tự không hợp lệ từ giá trị nhập vào (nếu có dấu phân cách hoặc ký tự không phải số)
+                existingProduct.Price = Convert.ToDecimal(product.Price.ToString().Replace(",", "").Replace(".", ""));
+                existingProduct.DiscountPrice = product.DiscountPrice.HasValue
+                    ? Convert.ToDecimal(product.DiscountPrice.Value.ToString().Replace(",", "").Replace(".", ""))
+                    : (decimal?)null;
+
+                // Cập nhật các trường khác
                 existingProduct.Name = product.Name;
-                existingProduct.Price = product.Price;
                 existingProduct.Stock = product.Stock;
                 existingProduct.TotalStock = product.TotalStock;
                 existingProduct.Image = product.Image;
@@ -92,9 +98,11 @@ namespace Final.Controllers
                 existingProduct.Storage = product.Storage;
                 existingProduct.Warranty = product.Warranty;
 
+                // Lưu thay đổi vào cơ sở dữ liệu
                 _context.SaveChanges();
                 return RedirectToAction("Index");
             }
+
             return View("~/Views/Admin/Product/Edit.cshtml", product);
         }
 
@@ -197,6 +205,40 @@ namespace Final.Controllers
             }
             return false;
         }
+
+        // Hiển thị danh sách đơn hàng
+        public async Task<IActionResult> OrderList()
+        {
+            var orders = await _context.Orders.Include(o => o.OrderItems).ThenInclude(oi => oi.Product).ToListAsync();
+            return View("~/Views/Admin/OrderServices/OrderList.cshtml", orders);
+        }
+
+        // Hiển thị chi tiết đơn hàng
+        public async Task<IActionResult> OrderDetails(int orderId)
+        {
+            var order = await _context.Orders.Include(o => o.OrderItems).ThenInclude(oi => oi.Product).FirstOrDefaultAsync(o => o.Id == orderId);
+            if (order == null)
+            {
+                return NotFound();
+            }
+            return View("~/Views/Admin/OrderServices/OrderDetails.cshtml", order);
+        }
+
+        // Cập nhật trạng thái đơn hàng
+        [HttpPost]
+        public async Task<IActionResult> UpdateOrderStatus([FromForm] UpdateOrderStatusModel model)
+        {
+            var order = await _context.Orders.FindAsync(model.OrderId);
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            order.Status = model.Status;
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("OrderList");
+        }
     }
 
     public class UserViewModel
@@ -216,5 +258,11 @@ namespace Final.Controllers
         public string Code3 { get; set; }
         [Required]
         public string Code4 { get; set; }
+    }
+
+    public class UpdateOrderStatusModel
+    {
+        public int OrderId { get; set; }
+        public string Status { get; set; }
     }
 }

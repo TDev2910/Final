@@ -1,0 +1,55 @@
+﻿@model Final.Models.Order
+
+@{
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng";
+}
+
+@if (Model != null)
+{
+    <h3>Chi tiết đơn hàng</h3>
+    <p><strong>Mã đơn hàng:</strong> @Model.Id</p>
+    <p><strong>Họ:</strong> @Model.FirstName</p>
+    <p><strong>Tên:</strong> @Model.LastName</p>
+    <p><strong>Số điện thoại:</strong> @Model.Phone</p>
+    <p><strong>Email:</strong> @Model.Email</p>
+    <p><strong>Địa chỉ:</strong> @Model.Address</p>
+    <p><strong>Phương thức giao hàng:</strong> @Model.ShippingMethod</p>
+    <p><strong>Thành phố:</strong> @Model.City</p>
+    <p><strong>Cửa hàng:</strong> @Model.Store</p>
+    <p><strong>Ghi chú:</strong> @Model.Notes</p>
+    <p><strong>Phương thức thanh toán:</strong> @Model.PaymentMethod</p>
+    <p><strong>Tổng giá trị:</strong> @Model.TotalPrice</p>
+    <p><strong>Ngày đặt hàng:</strong> @Model.OrderDate</p>
+    <p><strong>Trạng thái:</strong> @Model.Status</p>
+
+    <h4>Sản phẩm trong đơn hàng</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Mã sản phẩm</th>
+                <th>Tên sản phẩm</th>
+                <th>Số lượng</th>
+                <th>Giá</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.OrderItems)
+            {
+                <tr>
+                    <td>@item.ProductId</td>
+                    <td>@item.Product.Name</td>
+                    <td>@item.Quantity</td>
+                    <td>@item.Price</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Đang tải...</p>
+}

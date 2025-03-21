@@ -14,11 +14,16 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+
 // Đăng ký dịch vụ thanh toán VNPay 
 builder.Services.AddTransient<IVnPayService, VnPayService>();
+
 // Cấu hình dịch vụ SMTP Email
 builder.Services.AddTransient<EmailService>();
-// Đăng ký dịch vụ thanh toán VNPay 
+
+// Đăng ký dịch vụ quản lý đơn hàng
+builder.Services.AddScoped<Final.Services.OrderService.OrderService>();
+
 // Cấu hình các dịch vụ MVC
 builder.Services.AddControllersWithViews();
 
@@ -31,8 +36,7 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true; // Session quan trọng, không bị xóa
 });
 
-var app = builder.Build();  
-
+var app = builder.Build();
 
 // Cấu hình pipeline HTTP
 if (!app.Environment.IsDevelopment())
@@ -46,7 +50,7 @@ app.UseStaticFiles();
 app.UseRouting();
 
 // Bổ sung Middleware xử lý Session
-app.UseSession(); // 
+app.UseSession();
 
 // Xác thực và phân quyền
 app.UseAuthentication();
@@ -66,7 +70,7 @@ using (var scope = app.Services.CreateScope())
 
 app.Run();
 
-//Phương thức tạo roles và tài khoản Admin
+// Phương thức tạo roles và tài khoản Admin
 async Task CreateRoles(IServiceProvider serviceProvider)
 {
     var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
