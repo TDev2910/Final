@@ -16,7 +16,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddDefaultTokenProviders();
 
 // Đăng ký dịch vụ thanh toán VNPay 
-builder.Services.AddTransient<IVnPayService, VnPayService>();
+builder.Services.AddScoped<IVnPayService, VnPayService>();
 
 // Cấu hình dịch vụ SMTP Email
 builder.Services.AddTransient<EmailService>();

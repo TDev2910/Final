@@ -76,9 +76,14 @@
                 <label for="PaymentMethod">Phương thức thanh toán</label>
                 <select asp-for="PaymentMethod" class="form-control" required>
                     <option value="COD">Thanh toán khi nhận hàng</option>
-                    <option value="VNPAY">Thanh toán bằng VNPAY</option>
+                    <option value="VNPAY">Thanh toán VNPAY</option>
                 </select>
             </div>
+            
+
+            @* thanh toán vnpay *@
+            @* <button asp-action="ConfirmPayment" asp-controller ="Order" asp-route-model="" type="submit" class="btn btn-primary form-control">Thanh toán</button> *@
+
 
             <button type="submit" class="btn btn-success mt-3">Xác nhận đơn hàng</button>
         </div>

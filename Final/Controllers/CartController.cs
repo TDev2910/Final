@@ -145,66 +145,66 @@ namespace Final.Controllers
             }
         }
 
-        //Mới thêm
-        public IActionResult PaymentCallback()
-        {
-            // Add detailed logging
-            _logger.LogInformation("Payment callback received: {QueryString}",
-                JsonConvert.SerializeObject(Request.Query.ToDictionary(q => q.Key, q => q.Value.ToString())));
+        ////Mới thêm
+        //public IActionResult PaymentCallback()
+        //{
+        //    // Add detailed logging
+        //    _logger.LogInformation("Payment callback received: {QueryString}",
+        //        JsonConvert.SerializeObject(Request.Query.ToDictionary(q => q.Key, q => q.Value.ToString())));
 
-            if (!Request.Query.TryGetValue("vnp_TxnRef", out var txnRefValues))
-            {
-                _logger.LogWarning("Payment callback missing transaction reference");
-                TempData["Error"] = "Không tìm thấy thông tin đơn hàng";
-                return RedirectToAction("Index", "Home");
-            }
+        //    if (!Request.Query.TryGetValue("vnp_TxnRef", out var txnRefValues))
+        //    {
+        //        _logger.LogWarning("Payment callback missing transaction reference");
+        //        TempData["Error"] = "Không tìm thấy thông tin đơn hàng";
+        //        return RedirectToAction("Index", "Home");
+        //    }
 
-            int orderId;
-            if (!int.TryParse(txnRefValues.FirstOrDefault(), out orderId))
-            {
-                _logger.LogWarning("Invalid order ID format: {OrderId}", txnRefValues.FirstOrDefault());
-                TempData["Error"] = "Mã đơn hàng không hợp lệ";
-                return RedirectToAction("Index", "Home");
-            }
+        //    int orderId;
+        //    if (!int.TryParse(txnRefValues.FirstOrDefault(), out orderId))
+        //    {
+        //        _logger.LogWarning("Invalid order ID format: {OrderId}", txnRefValues.FirstOrDefault());
+        //        TempData["Error"] = "Mã đơn hàng không hợp lệ";
+        //        return RedirectToAction("Index", "Home");
+        //    }
 
-            var order = _context.Orders.FirstOrDefault(o => o.Id == orderId);
-            if (order == null)
-            {
-                _logger.LogWarning("Order not found: {OrderId}", orderId);
-                TempData["Error"] = "Không tìm thấy đơn hàng";
-                return RedirectToAction("Index", "Home");
-            }
+        //    var order = _context.Orders.FirstOrDefault(o => o.Id == orderId);
+        //    if (order == null)
+        //    {
+        //        _logger.LogWarning("Order not found: {OrderId}", orderId);
+        //        TempData["Error"] = "Không tìm thấy đơn hàng";
+        //        return RedirectToAction("Index", "Home");
+        //    }
 
-            var vnPayService = HttpContext.RequestServices.GetService<IVnPayService>();
-            var response = vnPayService.PaymentExecute(Request.Query);
+        //    var vnPayService = HttpContext.RequestServices.GetService<IVnPayService>();
+        //    var response = vnPayService.PaymentExecute(Request.Query);
 
-            _logger.LogInformation("Payment response for order {OrderId}: Success={Success}, Code={Code}",
-                orderId, response.Success, response.VnPayResponseCode);
+        //    _logger.LogInformation("Payment response for order {OrderId}: Success={Success}, Code={Code}",
+        //        orderId, response.Success, response.VnPayResponseCode);
 
-            if (response.Success)
-            {
-                if (response.VnPayResponseCode == "00")
-                {
-                    order.Status = "Đã thanh toán";
-                    _context.SaveChanges();
-                    HttpContext.Session.Remove("Cart");
-                    TempData["Success"] = "Thanh toán thành công!";
-                    return RedirectToAction("OrderSuccess", "Order", new { id = orderId });
-                }
-                else
-                {
-                    order.Status = "Thanh toán thất bại";
-                    _context.SaveChanges();
-                    TempData["Error"] = $"Thanh toán thất bại! Mã lỗi: {response.VnPayResponseCode}";
-                    return RedirectToAction("Index");
-                }
-            }
-            else
-            {
-                _logger.LogWarning("Invalid payment data for order {OrderId}", orderId);
-                TempData["Error"] = "Dữ liệu thanh toán không hợp lệ!";
-                return RedirectToAction("Index");
-            }
-        }
+        //    if (response.Success)
+        //    {
+        //        if (response.VnPayResponseCode == "00")
+        //        {
+        //            order.Status = "Đã thanh toán";
+        //            _context.SaveChanges();
+        //            HttpContext.Session.Remove("Cart");
+        //            TempData["Success"] = "Thanh toán thành công!";
+        //            return RedirectToAction("OrderSuccess", "Order", new { id = orderId });
+        //        }
+        //        else
+        //        {
+        //            order.Status = "Thanh toán thất bại";
+        //            _context.SaveChanges();
+        //            TempData["Error"] = $"Thanh toán thất bại! Mã lỗi: {response.VnPayResponseCode}";
+        //            return RedirectToAction("Index");
+        //        }
+        //    }
+        //    else
+        //    {
+        //        _logger.LogWarning("Invalid payment data for order {OrderId}", orderId);
+        //        TempData["Error"] = "Dữ liệu thanh toán không hợp lệ!";
+        //        return RedirectToAction("Index");
+        //    }
+        //}
     }
 }
