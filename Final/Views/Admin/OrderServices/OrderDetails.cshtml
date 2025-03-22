@@ -17,13 +17,9 @@
     <p><strong>Số điện thoại:</strong> @Model.Phone</p>
     <p><strong>Email:</strong> @Model.Email</p>
     <p><strong>Địa chỉ:</strong> @Model.Address</p>
-    <p><strong>Phương thức giao hàng:</strong> @Model.ShippingMethod</p>
-    <p><strong>Thành phố:</strong> @Model.City</p>
-    <p><strong>Cửa hàng:</strong> @Model.Store</p>
-    <p><strong>Ghi chú:</strong> @Model.Notes</p>
+    <p><strong>Phương thức vận chuyển:</strong> @Model.ShippingMethod</p>
     <p><strong>Phương thức thanh toán:</strong> @Model.PaymentMethod</p>
     <p><strong>Tổng giá trị:</strong> @Model.TotalPrice</p>
-    <p><strong>Ngày đặt hàng:</strong> @Model.OrderDate</p>
     <p><strong>Trạng thái:</strong> @Model.Status</p>
 
     <h4>Sản phẩm trong đơn hàng</h4>
@@ -48,6 +44,11 @@
             }
         </tbody>
     </table>
+
+    <form asp-action="DeleteOrder" method="post">
+        <input type="hidden" name="id" value="@Model.Id" />
+        <button type="submit" class="btn btn-danger">Xóa đơn hàng</button>
+    </form>
 }
 else
 {

@@ -1,4 +1,5 @@
 ﻿using Final.Models;
+using Final.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Final.Controllers
@@ -15,12 +17,14 @@ namespace Final.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly EmailService _emailService;
         private const string SecurityCode = "2910"; // Mã bảo mật mặc định
 
-        public AdminController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public AdminController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, EmailService emailService)
         {
             _context = context;
             _userManager = userManager;
+            _emailService = emailService;
         }
 
         // Trang Dashboard Admin
@@ -237,7 +241,55 @@ namespace Final.Controllers
             order.Status = model.Status;
             await _context.SaveChangesAsync();
 
+            // Gửi email thông báo cập nhật trạng thái đơn hàng
+            var emailBody = GenerateOrderStatusUpdateEmailBody(order);
+            await _emailService.SendEmailAsync(order.Email, "Cập nhật trạng thái đơn hàng", emailBody);
+
+            TempData["Success"] = "Cập nhật trạng thái đơn hàng thành công!";
             return RedirectToAction("OrderList");
+        }
+
+        private string GenerateOrderStatusUpdateEmailBody(Order order)
+        {
+            var body = new StringBuilder();
+            body.AppendLine("<h2>Cập nhật trạng thái đơn hàng</h2>");
+            body.AppendLine($"<p><strong>Mã đơn hàng:</strong> {order.Id}</p>");
+            body.AppendLine($"<p><strong>Trạng thái mới:</strong> {order.Status}</p>");
+            body.AppendLine("<h4>Thông tin đơn hàng</h4>");
+            body.AppendLine($"<p><strong>Họ:</strong> {order.FirstName}</p>");
+            body.AppendLine($"<p><strong>Tên:</strong> {order.LastName}</p>");
+            body.AppendLine($"<p><strong>Số điện thoại:</strong> {order.Phone}</p>");
+            body.AppendLine($"<p><strong>Email:</strong> {order.Email}</p>");
+            body.AppendLine($"<p><strong>Địa chỉ:</strong> {order.Address}</p>");
+            body.AppendLine($"<p><strong>Phương thức vận chuyển:</strong> {order.ShippingMethod}</p>");
+            body.AppendLine($"<p><strong>Phương thức thanh toán:</strong> {order.PaymentMethod}</p>");
+            body.AppendLine($"<p><strong>Tổng giá trị:</strong> {order.TotalPrice}</p>");
+            body.AppendLine("<h4>Sản phẩm trong đơn hàng</h4>");
+            body.AppendLine("<ul>");
+            foreach (var item in order.OrderItems)
+            {
+                body.AppendLine($"<li>{item.Product.Name} - Số lượng: {item.Quantity} - Giá: {item.Price}</li>");
+            }
+            body.AppendLine("</ul>");
+            return body.ToString();
+        }
+
+        // xóa đơn hàng
+        [HttpPost]
+        public IActionResult DeleteOrder(int id)
+        {
+            var order = _context.Orders.FirstOrDefault(o => o.Id == id);
+            if (order == null)
+            {
+                TempData["Error"] = "Đơn hàng không tồn tại!";
+                return RedirectToAction("OrderDetails", new { id });
+            }
+
+            _context.Orders.Remove(order);
+            _context.SaveChanges();
+
+            TempData["Success"] = "Đơn hàng đã được xóa thành công!";
+            return Redirect("/Admin/OrderList");
         }
     }
 
